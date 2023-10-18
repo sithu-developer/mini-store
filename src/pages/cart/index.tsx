@@ -2,9 +2,11 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Box , Button, Typography } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { updateQuantity } from "@/store/slices/cartSlice";
+import { createOrder, updateQuantity } from "@/store/slices/cartSlice";
+import { useRouter } from "next/router";
 
 const Cart = () => {
+    const router = useRouter();
     const cartItems = useAppSelector((store) => store.cart.items);
     const dispatch = useAppDispatch();
 
@@ -21,6 +23,15 @@ const Cart = () => {
         dispatch(updateQuantity({id : id , quantity : qtn}));
     };
 
+    const onSuccess = (data :any) => {
+        router.push(`/comfirmation?orderId=${data.id}&status=${data.status}`);
+    }
+    const onError = () => {}
+
+    const handleComfirmOrder = () => {
+        dispatch(createOrder({ payload : cartItems , onSuccess , onError }));
+        // router.push("/comfirmation");
+    }
         
     return (
         <Box>
@@ -53,7 +64,9 @@ const Cart = () => {
             </Box>
             {cartItems.length > 0 && <Box sx={{ display : "flex", flexDirection : "column", alignItems: "center", gap: "20px", mt: "10px"}}>
                     <Typography variant="h4">Total price : {getCartTotalPrice()}</Typography>
-                    <Button variant="contained">Confirm Order</Button>
+                    <Button variant="contained" onClick={() => {
+                        handleComfirmOrder();   
+                    } }>Confirm Order</Button>
                 </Box>
             }
         </Box>
